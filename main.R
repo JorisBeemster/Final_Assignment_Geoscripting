@@ -5,6 +5,7 @@ library(raster)
 library(rtiff)
 library(sp)
 library(rgdal)
+library(gdalUtils)
 
 # Load functions
 source("R/raster_thresholding.R")
@@ -54,3 +55,20 @@ AHN_5m = merge(raster(AHN_files[1]),
 
 # Reproject computed coastlines
 coastlines = spTransform(coastlines, CRS(proj4string(AHN_5m)))
+
+# Load RWS water table heights
+unzip('./data/waterstanden.zip', exdir = data_folder, overwrite = TRUE)
+csvfiles = list.files(data_folder, pattern = glob2rx("*.csv"), full.names = TRUE)
+waterstanden = read.csv(csvfiles, sep=";")
+
+# RWS measurement stations
+RWS_station_coords = matrix(c(576756.115680625, 5691113.19915419, 581080.037560033, 5692490.64235438), nrow = 2, byrow = TRUE)
+RWS_station_names = c("baalhoek", "schaar_vd_noord")
+RWS_stations = SpatialPointsDataFrame(RWS_station_coords, data.frame(RWS_station_names), proj4string = CRS("+init=epsg:32631"))
+RWS_stations = spTransform(RWS_stations, CRS(proj4string(AHN_5m)))
+baalhoek_buffer = buffer(RWS_stations[1,], 1500)
+schaar_vd_noord_buffer = buffer(RWS_stations[2,], 1500)
+
+# Get coastlines in proximity of measurement stations
+cl_baalhoek = crop(coastlines, baalhoek_buffer)
+cl_schaar_vd_noord = crop(coastlines, schaar_vd_noord_buffer)
