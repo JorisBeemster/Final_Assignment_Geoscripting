@@ -2,9 +2,9 @@
 
 # Import packages
 library(raster)
-library(sp)
-library(gdalUtils)
 
+# Load functions
+source("R/raster_thresholding.R")
 
 # Create data and output folders and download data from URL
 data_folder   <- "./data"
@@ -24,4 +24,5 @@ unzip('./data/mndwiSeries.zip', exdir = data_folder, overwrite = TRUE)
 tiffile = list.files(data_folder, pattern = glob2rx("*.tif"), full.names = TRUE)
 MNDWI = stack(tiffile)
 
-## Detect coastline
+
+
