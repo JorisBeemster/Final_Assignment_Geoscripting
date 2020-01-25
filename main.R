@@ -4,6 +4,7 @@
 library(raster)
 library(rtiff)
 library(sp)
+library(rgdal)
 
 # Load functions
 source("R/raster_thresholding.R")
@@ -24,7 +25,7 @@ if (!dir.exists(output_folder)) {
 #mndwi_URL = "https://drive.google.com/open?id=1H2LJKpcRhppegSBjTBoG8E8O677zgu4T"
 #download.file(url=mndwi_URL, destfile='./data/mndwiSeries.zip', method='auto', overwrite = TRUE)
 unzip('./data/mndwiSeries.zip', exdir = data_folder, overwrite = TRUE)
-tiffile = list.files(data_folder, pattern = glob2rx("*.tif"), full.names = TRUE)
+tiffile = list.files(data_folder, pattern = glob2rx("mndwi*.tif"), full.names = TRUE)
 MNDWI = stack(tiffile)
 
 # classify as water or land
@@ -50,3 +51,6 @@ AHN_5m = merge(raster(AHN_files[1]),
                raster(AHN_files[2]), 
                raster(AHN_files[3]), 
                raster(AHN_files[4]))
+
+# Reproject computed coastlines
+coastlines = spTransform(coastlines, CRS(proj4string(AHN_5m)))
