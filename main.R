@@ -3,6 +3,8 @@
 # Import packages
 library(raster)
 library(sp)
+library(gdalUtils)
+
 
 # Create data and output folders and download data from URL
 data_folder   <- "./data"
@@ -16,5 +18,10 @@ if (!dir.exists(output_folder)) {
 }
 
 # Load MNDWI data
-mndwi_URL = "https://drive.google.com/open?id=1vXGFJuFcCepCvKT50IEDq-9PcvBwQFHo"
-download.file(url=mndwi_URL, destfile='data/mndwiSeries.tif', method='auto', overwrite = TRUE)
+#mndwi_URL = "https://drive.google.com/open?id=1H2LJKpcRhppegSBjTBoG8E8O677zgu4T"
+#download.file(url=mndwi_URL, destfile='./data/mndwiSeries.zip', method='auto', overwrite = TRUE)
+unzip('./data/mndwiSeries.zip', exdir = data_folder, overwrite = TRUE)
+tiffile = list.files(data_folder, pattern = glob2rx("*.tif"), full.names = TRUE)
+MNDWI = stack(tiffile)
+
+## Detect coastline
