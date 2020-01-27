@@ -77,3 +77,4 @@ cl_schaar_vd_noord = crop(coastlines, schaar_vd_noord_buffer)
 # Get water levels and standard deviations
 H_baalhoek =        heightFromCL(cl_baalhoek       , AHN_5m)
 H_schaar_vd_noord = heightFromCL(cl_schaar_vd_noord, AHN_5m)
+
