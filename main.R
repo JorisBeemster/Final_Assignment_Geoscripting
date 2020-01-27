@@ -29,7 +29,12 @@ if (!dir.exists(output_folder)) {
 unzip('./data/mndwiSeries.zip', exdir = data_folder, overwrite = TRUE)
 tiffile = list.files(data_folder, pattern = glob2rx("mndwi*.tif"), full.names = TRUE)
 MNDWI = stack(tiffile)
+MNDWI_info = gdalinfo(tiffile)
 
+# Get dates of bands
+MNDWI_dates = MNDWI_info[grepl(glob2rx('*LC08*'), MNDWI_info)]
+MNDWI_dates = substring(MNDWI_dates, 45)
+  
 # classify as water or land
 water_classification = raster_thresholding(MNDWI)
 
@@ -40,8 +45,10 @@ coastlines = boundary_detection(water_classification)
 AHN_urls = c('https://geodata.nationaalgeoregister.nl/ahn3/extract/ahn3_5m_dtm/M5_49CZ2.ZIP',
             'https://geodata.nationaalgeoregister.nl/ahn3/extract/ahn3_5m_dtm/M5_49DZ1.ZIP',
             'https://geodata.nationaalgeoregister.nl/ahn3/extract/ahn3_5m_dtm/M5_55AN2.ZIP',
-            'https://geodata.nationaalgeoregister.nl/ahn3/extract/ahn3_5m_dtm/M5_55BN1.ZIP')
-AHN_mapsheets =  c('49CZ2', '49DZ1', '55AN2', '55BN1')
+            'https://geodata.nationaalgeoregister.nl/ahn3/extract/ahn3_5m_dtm/M5_55BN1.ZIP',
+            'https://geodata.nationaalgeoregister.nl/ahn3/extract/ahn3_5m_dtm/M5_49CZ1.ZIP',
+            'https://geodata.nationaalgeoregister.nl/ahn3/extract/ahn3_5m_dtm/M5_55AN1.ZIP')
+AHN_mapsheets =  c('49CZ2', '49DZ1', '55AN2', '55BN1','49CZ1','55AN1')
 for (i in 1:length(AHN_urls)){
   filename = paste(data_folder, '/', AHN_mapsheets[i], sep = '')
   download.file(url = AHN_urls[i], destfile = filename, method = 'auto', overwrite = TRUE)
@@ -52,10 +59,15 @@ AHN_files = list.files(data_folder, pattern = glob2rx('m5*'), full.names = TRUE)
 AHN_5m = merge(raster(AHN_files[1]), 
                raster(AHN_files[2]), 
                raster(AHN_files[3]), 
-               raster(AHN_files[4]))
+               raster(AHN_files[4]),
+               raster(AHN_files[5]),
+               raster(AHN_files[6]))
 
 # Reproject computed coastlines
 coastlines = spTransform(coastlines, CRS(proj4string(AHN_5m)))
+
+# Crop AHN to coastlines
+AHN_5m = crop(AHN_5m, coastlines)
 
 # Load RWS water table heights
 unzip('./data/waterstanden.zip', exdir = data_folder, overwrite = TRUE)
