@@ -1,17 +1,16 @@
 // Get Landsat Data
 var Landsat8Boa= ee.ImageCollection("LANDSAT/LC08/C01/T1_SR")
 var Saeftinghe_Landsat = Landsat8Boa
-.filterDate('2013-01-01', '2017-12-31')
-.filterBounds(Saeftinghe)
-.filterMetadata('CLOUD_COVER', 'less_than', 10)
+    .filterDate('2013-01-01', '2019-12-31')
+    .filterBounds(Saeftinghe)
+    .filterMetadata('CLOUD_COVER', 'less_than', 10)
 print(Saeftinghe_Landsat)
-
 
 var thefunction = function thefunction(image) {
   return image.normalizedDifference(['B3', 'B6'])
-  .rename(ee.String('mndwi_')
-          .cat('_')
-          .cat(ee.Date(image.get('system:time_start')).format().replace(":","-","g")))
+                                    .rename(ee.String('mndwi_')
+                                                               .cat('_')
+                                                               .cat(ee.Date(image.get('system:time_start')).format().replace(":","-","g")))
 }
 
 var mndwiSeries = Saeftinghe_Landsat.map(thefunction).toBands().clip(Saeftinghe)
@@ -26,3 +25,4 @@ Export.image.toDrive({
   region: Saeftinghe,
   fileFormat: 'GeoTIFF',
 });
+
